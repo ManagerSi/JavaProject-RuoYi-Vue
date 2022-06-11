@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.TblCalendarMapper">
+    
+    <resultMap type="TblCalendar" id="TblCalendarResult">
+        <result property="id"    column="id"    />
+        <result property="date"    column="date"    />
+        <result property="calendartype"    column="calendarType"    />
+        <result property="isdelete"    column="isDelete"    />
+        <result property="createtime"    column="createTime"    />
+        <result property="updatetime"    column="updateTime"    />
+    </resultMap>
+
+    <sql id="selectTblCalendarVo">
+        select id, date, calendarType, isDelete, createTime, updateTime from tbl_calendar
+    </sql>
+
+    <select id="selectTblCalendarList" parameterType="TblCalendar" resultMap="TblCalendarResult">
+        <include refid="selectTblCalendarVo"/>
+        <where>  
+            <if test="date != null "> and date = #{date}</if>
+            <if test="calendartype != null "> and calendarType = #{calendartype}</if>
+            <if test="updatetime != null "> and updateTime = #{updatetime}</if>
+        </where>
+    </select>
+    
+    <select id="selectTblCalendarById" parameterType="Long" resultMap="TblCalendarResult">
+        <include refid="selectTblCalendarVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTblCalendar" parameterType="TblCalendar" useGeneratedKeys="true" keyProperty="id">
+        insert into tbl_calendar
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="date != null">date,</if>
+            <if test="calendartype != null">calendarType,</if>
+            <if test="isdelete != null">isDelete,</if>
+            <if test="createtime != null">createTime,</if>
+            <if test="updatetime != null">updateTime,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="date != null">#{date},</if>
+            <if test="calendartype != null">#{calendartype},</if>
+            <if test="isdelete != null">#{isdelete},</if>
+            <if test="createtime != null">#{createtime},</if>
+            <if test="updatetime != null">#{updatetime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTblCalendar" parameterType="TblCalendar">
+        update tbl_calendar
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="date != null">date = #{date},</if>
+            <if test="calendartype != null">calendarType = #{calendartype},</if>
+            <if test="isdelete != null">isDelete = #{isdelete},</if>
+            <if test="createtime != null">createTime = #{createtime},</if>
+            <if test="updatetime != null">updateTime = #{updatetime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTblCalendarById" parameterType="Long">
+        delete from tbl_calendar where id = #{id}
+    </delete>
+
+    <delete id="deleteTblCalendarByIds" parameterType="String">
+        delete from tbl_calendar where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>
