@@ -33,6 +33,25 @@
       </el-form-item>
     </el-form>
 
+  <!--添加日历控件-->
+  <el-calendar >
+    <template  slot="dateCell" slot-scope="{date, data}">
+      <div  @click="changeDayType(data)" class="calendarCell" style="width: 100%; height: 100%; margin-top: -20px;">
+        <p v-if="data.type == 'current-month'"> {{ data.day.split('-').slice(1).join('-') }} </p>
+        
+        <!--solution 1, no work-->
+        <!-- <p v-if="monthValues[parseInt(data.day.substr(-2))] >0">{{ dayEnum[monthValues[parseInt(data.day.substr(-2))]] }}</p> -->
+
+        <!--solution 2, work-->
+        <div v-for="item in specialDays">
+          <p v-if="item.day == data.day.split('-').slice(1).join('-')">{{dayEnum[item.type]}}</p>
+        </div>
+      </div>
+    </template>
+  </el-calendar>
+
+
+
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
@@ -211,13 +230,56 @@ export default {
         createtime: [
           { required: true, message: "创建时间不能为空", trigger: "blur" }
         ],
-      }
+      },
+      dayEnum:["","工作日","放假"],
+      //calendar 控件值      
+      monthValues: ['0','1','2','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'],
+      specialDays:[
+        {"day":"06-01","type":1},
+        {"day":"06-02","type":1},
+        {"day":"06-03","type":2}
+      ]
     };
   },
   created() {
     this.getList();
   },
   methods: {
+    //调整日期类型
+    changeDayType(data){
+      //console.log(data);
+      // //solution 1
+      // let day = parseInt(data.day.substr(-2));
+      // let t = this.monthValues[day];
+      // // console.log(this.monthValues[day]);
+      // this.monthValues[day] = (t+1)%3;
+      // // console.log(this.monthValues[day]);
+      
+      // solution 2
+      let md = data.day.split('-').slice(1).join('-');
+      //console.log(md)
+
+      let index = -1;
+      for(let i = 0; i<this.specialDays.length;i++){
+        if(this.specialDays[i].day == md)
+        {
+          index = i;
+          let dtype = this.specialDays[i].type;
+          console.log(dtype);
+          this.specialDays[i].type = (dtype+1)%3;
+          console.log(this.specialDays[i].type);
+          break;
+        }
+      }
+
+      //新增
+      if(index== -1){
+        let newday =  {"day":md,"type":1};
+        this.specialDays.push(newday);
+      }
+      
+    },
+
     /** 查询日历列表 */
     getList() {
       this.loading = true;
@@ -314,4 +376,6 @@ export default {
     }
   }
 };
+
+
 </script>
