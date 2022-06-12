@@ -22,10 +22,10 @@ public interface TblCalendarMapper
     /**
      * 查询日历列表
      * 
-     * @param tblCalendar 日历
+     * @param yearMon 年月
      * @return 日历集合
      */
-    public List<TblCalendar> selectTblCalendarList(TblCalendar tblCalendar);
+    public List<TblCalendar> selectTblCalendarList(String yearMon);
 
     /**
      * 新增日历

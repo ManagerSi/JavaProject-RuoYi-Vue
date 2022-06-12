@@ -1,55 +1,54 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="日期" prop="date">
+      <el-form-item label="月份" prop="date">
         <el-date-picker clearable
           v-model="queryParams.date"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择日期">
+          type="month"
+          value-format="yyyy-MM"
+          placeholder="请选择月份">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="类型: 1工作日, 2节假日, 3加班, 4调休" prop="calendartype">
-        <el-select v-model="queryParams.calendartype" placeholder="请选择类型: 1工作日, 2节假日, 3加班, 4调休" clearable>
-          <el-option
-            v-for="dict in dict.type.sys_user_sex"
-            :key="dict.value"
-            :label="dict.label"
-            :value="dict.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="更新时间" prop="updatetime">
-        <el-date-picker clearable
-          v-model="queryParams.updatetime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择更新时间">
-        </el-date-picker>
-      </el-form-item>
+
+      <!--
+        <el-form-item label="类型" prop="calendartype">
+          <el-select v-model="queryParams.calendartype" placeholder="请选择类型: 1工作日, 2节假日, 3加班, 4调休" clearable>
+            <el-option
+              v-for="dict in dict.type.sys_user_sex"
+              :key="dict.value"
+              :label="dict.label"
+              :value="dict.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="更新时间" prop="updatetime">
+          <el-date-picker clearable
+            v-model="queryParams.updatetime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择更新时间">
+          </el-date-picker>
+        </el-form-item>
+      -->
+
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-  <!--添加日历控件-->
-  <el-calendar >
-    <template  slot="dateCell" slot-scope="{date, data}">
-      <div  @click="changeDayType(data)" class="calendarCell" style="width: 100%; height: 100%; margin-top: -20px;">
-        <p v-if="data.type == 'current-month'"> {{ data.day.split('-').slice(1).join('-') }} </p>
-        
-        <!--solution 1, no work-->
-        <!-- <p v-if="monthValues[parseInt(data.day.substr(-2))] >0">{{ dayEnum[monthValues[parseInt(data.day.substr(-2))]] }}</p> -->
-
-        <!--solution 2, work-->
-        <div v-for="item in specialDays">
-          <p v-if="item.day == data.day.split('-').slice(1).join('-')">{{dayEnum[item.type]}}</p>
-        </div>
-      </div>
-    </template>
-  </el-calendar>
-
+    <!--添加日历控件-->
+     <el-calendar v-model="nowdate">
+        <template  slot="dateCell" slot-scope="{date, data}">
+          <div  @click="changeDayType(data)" class="calendarCell" style="width: 100%; height: 100%; margin-top: -20px;">
+            <p v-if="data.type == 'current-month'"> {{ data.day.split('-').slice(1).join('-') }} </p>
+            <!--solution 2, work-->
+            <div v-for="item in specialDays">
+              <p v-if="item.day == data.day.split('-').slice(1).join('-')">{{dayEnum[item.type]}}</p>
+            </div>
+          </div>
+        </template>
+      </el-calendar>
 
 
     <el-row :gutter="10" class="mb8">
@@ -106,7 +105,7 @@
           <span>{{ parseTime(scope.row.date, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="类型: 1工作日, 2节假日, 3加班, 4调休" align="center" prop="calendartype">
+      <el-table-column label="类型" align="center" prop="calendartype">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.sys_user_sex" :value="scope.row.calendartype"/>
         </template>
@@ -161,7 +160,7 @@
             placeholder="请选择日期">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="类型: 1工作日, 2节假日, 3加班, 4调休" prop="calendartype">
+        <el-form-item label="类型" prop="calendartype">
           <el-select v-model="form.calendartype" placeholder="请选择类型: 1工作日, 2节假日, 3加班, 4调休">
             <el-option
               v-for="dict in dict.type.sys_user_sex"
@@ -213,7 +212,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        date: null,
+        date: new Date(),
         calendartype: null,
         updatetime: null
       },
@@ -231,14 +230,10 @@ export default {
           { required: true, message: "创建时间不能为空", trigger: "blur" }
         ],
       },
+      nowdate: new Date(),
       dayEnum:["","工作日","放假"],
       //calendar 控件值      
-      monthValues: ['0','1','2','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0'],
-      specialDays:[
-        {"day":"06-01","type":1},
-        {"day":"06-02","type":1},
-        {"day":"06-03","type":2}
-      ]
+      specialDays:[]
     };
   },
   created() {
@@ -247,16 +242,11 @@ export default {
   methods: {
     //调整日期类型
     changeDayType(data){
-      //console.log(data);
-      // //solution 1
-      // let day = parseInt(data.day.substr(-2));
-      // let t = this.monthValues[day];
-      // // console.log(this.monthValues[day]);
-      // this.monthValues[day] = (t+1)%3;
-      // // console.log(this.monthValues[day]);
       
-      // solution 2
+      console.log('------------changeDayType--------------------');
+      console.log(data);
       let md = data.day.split('-').slice(1).join('-');
+      let newType = 0;
       //console.log(md)
 
       let index = -1;
@@ -267,8 +257,23 @@ export default {
           let dtype = this.specialDays[i].type;
           console.log(dtype);
           this.specialDays[i].type = (dtype+1)%3;
+          newType = this.specialDays[i].type;
           console.log(this.specialDays[i].type);
-          break;
+            
+          //call api
+          var apidata = {
+            "id":this.specialDays[i].id,
+            "date":data.day,//new Date(year, month-1, day),
+            "calendartype":newType,
+            "isdelete":0
+          }
+          console.log(apidata);
+          updateCalendar(apidata).then(response => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });;
+          return;
         }
       }
 
@@ -276,14 +281,48 @@ export default {
       if(index== -1){
         let newday =  {"day":md,"type":1};
         this.specialDays.push(newday);
+        newType = 1;
+        
+        //call api
+        var apidata = {
+          "date":data.day,//new Date(year, month-1, day),
+          "calendartype":newType,
+          "isdelete":0
+        }
+        console.log(apidata);
+        addCalendar(apidata).then(response => {
+              this.$modal.msgSuccess("修改成功");
+              this.open = false;
+              this.getList();
+            });;
       }
-      
+
+    },
+
+    //设置日历表
+    setCalendarMon(date){
+      if(date != null){
+        this.nowdate = date;
+      }
     },
 
     /** 查询日历列表 */
     getList() {
       this.loading = true;
       listCalendar(this.queryParams).then(response => {
+        console.log('-------------------getList-------------------');
+        this.setCalendarMon(this.queryParams.date);
+        this.specialDays=[];
+        console.log(response.rows);
+        for(let i=0; i<response.rows.length;i++){
+          this.specialDays.push({
+            "id":response.rows[i].id,
+            "day": response.rows[i].date.substring(5,10),            
+            "type":response.rows[i].calendartype
+          })
+        }
+        console.log(this.specialDays);
+
         this.calendarList = response.rows;
         this.total = response.total;
         this.loading = false;

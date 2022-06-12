@@ -1,5 +1,7 @@
 package com.ruoyi.system.service.impl;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -40,7 +42,11 @@ public class TblCalendarServiceImpl implements ITblCalendarService
     @Override
     public List<TblCalendar> selectTblCalendarList(TblCalendar tblCalendar)
     {
-        return tblCalendarMapper.selectTblCalendarList(tblCalendar);
+        if(tblCalendar == null || tblCalendar.getDate() == null)
+            return tblCalendarMapper.selectTblCalendarList(null);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM");
+        return tblCalendarMapper.selectTblCalendarList(dateFormat.format(tblCalendar.getDate()));
     }
 
     /**

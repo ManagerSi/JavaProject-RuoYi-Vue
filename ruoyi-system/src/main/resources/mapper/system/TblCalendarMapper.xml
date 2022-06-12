@@ -17,12 +17,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, date, calendarType, isDelete, createTime, updateTime from tbl_calendar
     </sql>
 
-    <select id="selectTblCalendarList" parameterType="TblCalendar" resultMap="TblCalendarResult">
+    <select id="selectTblCalendarList" resultMap="TblCalendarResult">
         <include refid="selectTblCalendarVo"/>
         <where>  
-            <if test="date != null "> and date = #{date}</if>
-            <if test="calendartype != null "> and calendarType = #{calendartype}</if>
-            <if test="updatetime != null "> and updateTime = #{updatetime}</if>
+            <if test="yearMon != null "> and DATE_FORMAT( date, "%Y-%m" ) = #{yearMon}</if>
         </where>
     </select>
     
